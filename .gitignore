@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/ 
+.ipynb_checkpoints/
+bert_grade_model/
+bert_old_model/
+y_true.txt
+y_final_pred.txt
+y_old_pred.txt
