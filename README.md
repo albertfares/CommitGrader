@@ -56,6 +56,12 @@ The system evaluates the quality of commit messages based on established best pr
     ```bash
     pip install -r requirements.txt
     ```
+> [!WARNING]
+> In order to download the Spacy model that we use, please make sure to run the following command:
+> 
+> `python -m spacy download en_core_web_sm`
+
+
     
 > [!IMPORTANT]
 > To use the `transformers` and `datasets` libraries, you need to create a Hugging Face account and configure the libraries:
