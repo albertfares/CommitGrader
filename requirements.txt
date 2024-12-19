@@ -1,0 +1,8 @@
+openai
+spacy
+tqdm
+numpy
+torch
+transformers
+datasets
+scikit-learn
