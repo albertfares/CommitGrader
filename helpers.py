@@ -7,6 +7,10 @@ from tqdm import tqdm
 
 
 
+import re
+
+import re
+
 def extract_commit_parts(commit_message):
     """
     Extracts the prefix, description, and body from a commit message.
@@ -16,45 +20,49 @@ def extract_commit_parts(commit_message):
 
     Returns:
         dict: A dictionary containing:
-            - "prefix": The extracted prefix (without the colon) if valid.
+            - "prefix": The extracted prefix (type only, without scope or colon).
             - "description": The message description after the prefix and colon.
             - "body": The body part of the commit message (everything after the first newline).
     """
-    # Define a regex pattern for valid prefixes
+    
+    print("EXTRACTING")
     valid_prefix_pattern = r"^[a-zA-Z]+(\([\w\s,]+\))?(!)?$"
     
-    # Replace escaped newlines with actual newlines
+    # Replace escaped newlines
     commit_message = commit_message.replace("\\n", "\n")
     
-    # Split the commit message into the first line and body (if any)
+    # Split first line and body
     first_line, _, body = commit_message.partition("\n")
     
-    # Temporarily remove content inside parentheses for colon detection
+    # Temporarily remove parentheses for colon detection
     first_line_no_parentheses = re.sub(r"\(.*?\)", "", first_line)
     
-    # Find the first colon within the first 10 characters of the adjusted line
     colon_index = first_line_no_parentheses.find(":")
-    if 0 < colon_index <= 10:  # Check if colon exists and is within the allowed range
+    if 0 < colon_index <= 10:
         potential_prefix = first_line[:colon_index].strip()
-        
-        # Normalize the prefix to handle extra spaces around parentheses
-        normalized_prefix = re.sub(r"\s*\(\s*", "(", potential_prefix)  # Remove spaces before "("
-        normalized_prefix = re.sub(r"\s*\)\s*", ")", normalized_prefix)  # Remove spaces after ")"
-        
-        # Validate the normalized prefix
+
+        normalized_prefix = re.sub(r"\s*\(\s*", "(", potential_prefix)
+        normalized_prefix = re.sub(r"\s*\)\s*", ")", normalized_prefix)
+
         if re.match(valid_prefix_pattern, normalized_prefix):
-            prefix = normalized_prefix
-            description = first_line[colon_index + 1:].strip()  # Description after the colon
+            # Extract type only (before parentheses)
+            type_only = normalized_prefix.split("(")[0]
+
+            # New logic: find real colon index in original first_line
+            real_colon_index = first_line.find(":")
+            if real_colon_index != -1:
+                description = first_line[real_colon_index + 1:].strip()
+            else:
+                description = first_line.strip()
+
+            prefix = type_only
         else:
-            # Not a valid prefix
             prefix = None
             description = first_line.strip()
     else:
-        # No colon or colon outside allowed range; treat the entire first line as description
         prefix = None
         description = first_line.strip()
-    
-    # Return the results
+
     return {
         "prefix": prefix,
         "description": description,
@@ -129,7 +137,7 @@ def evaluate_prefix(prefix):
 
 
 
-def grade_description(commit_message, tokenizer, model):
+def grade_description(description, tokenizer, model):
     """
     Grades the description of a commit message using the trained BERT model.
 
@@ -142,8 +150,7 @@ def grade_description(commit_message, tokenizer, model):
         int: Predicted grade (0, 1, 2, or 3).
     """
     # Import the helper function to extract the description
-    extracted_parts: Dict[str, str] = extract_commit_parts(commit_message)
-    description = extracted_parts["description"]
+    description = description
 
     if not description:
         raise ValueError("The commit message does not contain a valid description to evaluate.")
@@ -351,6 +358,11 @@ def grade_commit_message(commit_message, nlp, tokenizer, model, no_openai=True):
     prefix = extracted["prefix"]
     description = extracted["description"]
     body = extracted["body"]
+
+    print("EXTRACTED PARTS:")
+    print("Prefix:", prefix)
+    print("Description:", description)
+    print("Body:", body)
 
     # Step 2: Grade description
     description_grade = grade_description(description, tokenizer, model)
