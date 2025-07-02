@@ -56,35 +56,16 @@ The system evaluates the quality of commit messages based on established best pr
     ```bash
     pip install -r requirements.txt
     ```
+
 > [!WARNING]
-> In order to download the Spacy model that we use, please make sure to run the following command:
+> To download the SpaCy model used for parsing and checking imperative verbs, please run:
 > 
-> `python -m spacy download en_core_web_sm`
+> ```bash
+> python -m spacy download en_core_web_sm
+> ```
 
-
-    
-> [!IMPORTANT]
-> To use the `transformers` and `datasets` libraries, you need to create a Hugging Face account and configure the libraries:
-> - Go to [Hugging Face](https://huggingface.co/) and create an account.
-> - After logging in, install the Hugging Face CLI:
->     ```bash
->     pip install huggingface_hub
->     ```
-> - Log in to the Hugging Face CLI:
->     ```bash
->     huggingface-cli login
->     ```
->   Enter your Hugging Face API token when prompted. You can get your token from your [Hugging Face account settings](https://huggingface.co/settings/tokens).
-
-3. Train the model:
-    Open the `train.ipynb` notebook in Jupyter Notebook or Jupyter Lab, and run all the cells. This will train the model and save the output for commit message grading.
-> [!NOTE]
-> The training process might take some time depending on the processor of the machine it’s run on. If you are using an Apple Sillicon chip, GPU acceleration might not work as expected. The training will fall back to CPU, which may result in slower performance.
-> 
-> Additionally, if you encounter an error (such as an MPS error), it should be handled accordingly.
-
-4. Obtain the API Key:
-    Since the code requires an API key for generating feedback, please contact me at [albert.fares@epfl.ch](mailto:albert.fares@epfl.ch) to request my personal API key.
+3. Obtain the OpenAI API key:
+    Since the code requires an API key to generate feedback using GPT, please contact me at [albert.fares@epfl.ch](mailto:albert.fares@epfl.ch) to request my personal API key.
 > [!WARNING]
 >    - **Usage Guidelines:**
 >      - Please use the key responsibly, as it is tied to my personal account and has limited funds.
@@ -102,10 +83,10 @@ You can grade a single commit message and generate feedback using the `process_s
 ```python
 from helpers import process_single_commit
 
-bert_model_path = "bert_grade_model/"
+model_name_or_path = "albertfares/CommitGrader"
 
 commit_message = "feat: add user authentication"
-result = process_single_commit(commit_message, bert_model_path)
+result = process_single_commit(commit_message, model_name_or_path)
 ```
 #### 2. Process commit messages grouped by SCIPER:
 To process multiple commit messages grouped by SCIPER, generate feedback, and calculate average grades, use the `process_commits_and_generate_feedback_with_sciper` function.
@@ -116,16 +97,16 @@ from helpers import process_commits_and_generate_feedback_with_sciper
 input_json_path = "testing_data.json"
 output_json_path = "output_feedback.json"
 
-bert_model_path = "bert_grade_model/"
+model_name_or_path = "albertfares/CommitGrader"
 
 # Set your api key here
 openai.api_key = ""
 
 # Process a subset of SCIPERs
-results = process_commits_and_generate_feedback_with_sciper(input_json_path, output_json_path, bert_model_path, start = 0, end = 2)
+results = process_commits_and_generate_feedback_with_sciper(input_json_path, output_json_path, model_name_or_path, start = 0, end = 2)
 
 # Process all SCIPERs
-results = process_commits_and_generate_feedback_with_sciper(input_json_path, output_json_path, bert_model_path)
+results = process_commits_and_generate_feedback_with_sciper(input_json_path, output_json_path, model_name_or_path)
 ```
 
 ##### **Input JSON Format**
