@@ -6,11 +6,6 @@ from typing import Dict
 from tqdm import tqdm
 
 
-
-import re
-
-import re
-
 def extract_commit_parts(commit_message):
     """
     Extracts the prefix, description, and body from a commit message.
@@ -25,7 +20,6 @@ def extract_commit_parts(commit_message):
             - "body": The body part of the commit message (everything after the first newline).
     """
     
-    print("EXTRACTING")
     valid_prefix_pattern = r"^[a-zA-Z]+(\([\w\s,]+\))?(!)?$"
     
     # Replace escaped newlines
@@ -359,10 +353,11 @@ def grade_commit_message(commit_message, nlp, tokenizer, model, no_openai=True):
     description = extracted["description"]
     body = extracted["body"]
 
-    print("EXTRACTED PARTS:")
+    print("Extracted Parts:")
     print("Prefix:", prefix)
     print("Description:", description)
     print("Body:", body)
+    print("================================================================================================")
 
     # Step 2: Grade description
     description_grade = grade_description(description, tokenizer, model)
@@ -643,7 +638,7 @@ def generate_feedback(commit_message, final_grade, description_grade, errors):
 
     if errors["is_not_imp_verb"]:
         prompt += (
-            "The description does not start with an imperative verb. Conventional commit messages should use action verbs like 'add', 'fix', or 'implement' to clearly state the intent.\n"
+            "The description does not start with an imperative verb (look at what comes after ':' and not the prefix to correct the student). Conventional commit messages should use action verbs like 'add', 'fix', or 'implement' to clearly state the intent.\n"
         )
         has_issues = True
 
@@ -701,7 +696,7 @@ def generate_feedback(commit_message, final_grade, description_grade, errors):
     # Use OpenAI API to generate the feedback
     try:
         response = openai.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful and constructive teaching assistant."},
                 {"role": "user", "content": prompt},
